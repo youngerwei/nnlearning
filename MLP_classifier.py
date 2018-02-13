@@ -1,3 +1,4 @@
+# coding=utf-8
 import math
 import random
 import numpy as np
@@ -5,7 +6,8 @@ from numpy import random
 import pylab
 import warnings
 
-# 这是在linux上，哦不，是在Windows上修改的。
+#  这是在linux上，哦不，是在Windows上修改的。
+# From Home
 
 warnings.filterwarnings("ignore")
 
