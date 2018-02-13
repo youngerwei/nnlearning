@@ -5,6 +5,7 @@ from numpy import random
 import pylab
 import warnings
 
+# This comments was added from windows.
 warnings.filterwarnings("ignore")
 
 
