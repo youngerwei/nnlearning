@@ -5,6 +5,8 @@ from numpy import random
 import pylab
 import warnings
 
+# 这是在linux上修改的。
+
 warnings.filterwarnings("ignore")
 
 
