@@ -12,7 +12,12 @@
 2、随机选取1个label，计算w向量和图像每个像素点的点积wx，然后以wx为参数通过logistic公式计算结果是1还是0；
 3、如果结果和图像label一致，进行正确判断的累加，累加到一定数量停止循环；如果不一致，则通过梯度下降法迭代特征向量w；
 4、迭代方法为 w(i)=迭代步长×x(i)×logistic函数。
+
+logistic回归模型的原理：是一种2类分类器，根据定义的logistic公式，使用训练数据来估计公式中的w，使所有样本都符合2类分类器的分类结果要求。
+然后用求得的w来估计未知输入，确定其分类。
+计算w时采用最大似然法，给出P(y=1|x)=π及P(y=0|x)=1-π的最大似然估计函数，然后计算其极值。极值计算可以采用梯度下降法或拟牛顿法。
 '''
+
 import time
 import math
 import random
@@ -62,10 +67,15 @@ class LogisticRegression(object):
             time += 1
             correct_count = 0
 
-            # calculate the parameter w using 梯度下降法
+            # calculate the parameter w using 最大似然估计法，通过计算对数形式的最大似然函数的极值计算w，
+            # 对数形式的最大似然函数的极值通过随机梯度下降法求得
+
+            # 先计算logistic公式中的参数和输入的点乘(w·x)和exp(w·x)
             wx = sum([self.w[i] * x[i] for i in xrange(len(self.w))])
             exp_wx = math.exp(wx)
 
+            # 用最大似然估计法计算对数形式的最大似然函数取极值是w的数值。
+            # 随机梯度下降法计算梯度，损失函数为-L, L为对数形式的最大似然函数。
             for i in xrange(len(self.w)):
                 self.w[i] -= self.learning_step * \
                              (-y * x[i] + float(x[i] * exp_wx) / float(1 + exp_wx))

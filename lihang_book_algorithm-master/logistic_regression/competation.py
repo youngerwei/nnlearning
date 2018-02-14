@@ -5,6 +5,8 @@
 # @Last modified by:   WenDesi
 # @Last modified time: 08-11-16
 
+# Results comparison of Perception method and LogisticRegression method
+
 import csv
 import pandas as pd
 
