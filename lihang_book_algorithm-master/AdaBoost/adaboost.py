@@ -21,6 +21,7 @@ sign_time_count = 0
 class Sign(object):
     '''
     阈值分类器
+    计算在当前w分布下，针对21000副图像的每一个像素点构成的21000列向量，确定阈值v，使像素点
 
     有两种方向，
         1）x<v y=1
@@ -48,6 +49,9 @@ class Sign(object):
         error_score = 1000000
 
         for i in self.indexes:
+            # 当index=0时，所有val=-1，所有数字为1的图像的像素点都计入误差；图像数字为0的不计入误差；
+            # 当index=1时，像素点为0时val=1；数字0的图像中像素点为0的计入误差，数字1的像素点为1的计入误差；
+            # 当index=2时，所有val=1，所有数字为0的图像计入误差
             score = 0
             for j in xrange(self.N):
                 val = -1
@@ -72,6 +76,9 @@ class Sign(object):
         error_score = 1000000
 
         for i in self.indexes:
+            # 当index=0时，所有val=1，所有数字为0的图像的像素点都计入误差；图像数字为1的不计入误差；
+            # 当index=1时，像素点为0时val=-1；数字0的图像中像素点为1的计入误差，数字1的像素点为0的计入误差；
+            # 当index=2时，所有val=-1，所有数字为1的图像计入误差
             score = 0
             for j in xrange(self.N):
                 val = 1
@@ -124,11 +131,11 @@ class AdaBoost(object):
         pass
 
     def _init_parameters_(self, features, labels):
-        self.X = features  # 训练集特征
-        self.Y = labels  # 训练集标签
+        self.X = features  # 训练集特征 21000x784
+        self.Y = labels  # 训练集标签 21000,一个10个标签0-9
 
-        self.n = len(features[0])  # 特征维度
-        self.N = len(features)  # 训练集大小
+        self.n = len(features[0])  # 特征维度 784
+        self.N = len(features)  # 训练集大小 21000
         self.M = 10  # 分类器数目
 
         self.w = [1.0 / self.N] * self.N  # 训练集的权值分布
@@ -167,6 +174,7 @@ class AdaBoost(object):
             best_classifier = (100000, None, None)  # (误差率,针对的特征，分类器)
             for i in xrange(self.n):
                 map_time -= time.time()
+                # 获取所有训练集图像中第i个像素的特征数据。
                 features = map(lambda x: x[i], self.X)
                 map_time += time.time()
                 classifier = Sign(features, self.Y, self.w)
@@ -223,11 +231,14 @@ class AdaBoost(object):
 # 二值化
 def binaryzation(img):
     cv_img = img.astype(np.uint8)
-    cv2.threshold(cv_img, 50, 1, cv2.cv.CV_THRESH_BINARY_INV, cv_img)
+    cv2.threshold(cv_img, 50, 1, cv2.THRESH_BINARY_INV, cv_img)
     return cv_img
 
 
 def binaryzation_features(trainset):
+    '''
+    根据给定阈值将图像变为二值化的图像
+    '''
     features = []
 
     for img in trainset:
