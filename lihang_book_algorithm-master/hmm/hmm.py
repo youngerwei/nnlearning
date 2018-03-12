@@ -198,7 +198,7 @@ def triangle(length):
 
 def sin(length):
     '''
-    三角波
+    正弦波
     '''
     import math
     X = [i for i in range(length)]

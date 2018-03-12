@@ -1,8 +1,9 @@
 #-*-coding:UTF-8-*-
-'''
+"""
 Created on 2014年9月25日
 @author: Ayumi Phoenix
-'''
+"""
+
 import numpy as np
 
 class HMM:
@@ -14,6 +15,9 @@ class HMM:
         self.M = self.B.shape[1]
         
     def printhmm(self):
+        """
+        :return:
+        """
         print "=================================================="
         print "HMM content: N =",self.N,",M =",self.M
         for i in range(self.N):
@@ -24,10 +28,17 @@ class HMM:
         print "hmm.pi",self.pi
         print "=================================================="
 
-    # 函数名称：Forward *功能：前向算法估计参数 *参数:phmm:指向HMM的指针
-    # T:观察值序列的长度 O:观察值序列    
-    # alpha:运算中用到的临时数组 pprob:返回值,所要求的概率
     def Forward(self,T,O,alpha,pprob):
+        """
+        前向算法估计参数,phmm:指向HMM的指针
+
+        :param T: 观察值序列的长度
+        :param O: 观察值序列
+        :param alpha: 运算中用到的临时数组
+        :param pprob: 返回值,所要求的概率
+        :return:
+        """
+
     #     1. Initialization 初始化
         for i in range(self.N):
             alpha[0,i] = self.pi[i]*self.B[i,O[0]]
@@ -44,9 +55,20 @@ class HMM:
         for i in range(self.N):
             sum += alpha[T-1,i]
         pprob[0] *= sum
-    
-    # 带修正的前向算法
+
+
     def ForwardWithScale(self,T,O,alpha,scale,pprob):
+        """
+        带修正的前向算法
+
+        :param T: 观察值序列的长度
+        :param O: 观察值序列
+        :param alpha: 运算中用到的临时数组
+        :param scale:
+        :param pprob: 返回值,所要求的概率
+        :return:
+        """
+
         scale[0] = 0.0
     #     1. Initialization
         for i in range(self.N):
@@ -73,10 +95,17 @@ class HMM:
         for t in range(T):
             pprob[0] += np.log(scale[t])
 
-    # 函数名称：Backward * 功能:后向算法估计参数 * 参数:phmm:指向HMM的指针 
-    # T:观察值序列的长度 O:观察值序列 
-    # beta:运算中用到的临时数组 pprob:返回值，所要求的概率
     def Backword(self,T,O,beta,pprob):
+        """
+        后向算法估计参数,phmm:指向HMM的指针
+
+        :param T: 观察值序列的长度
+        :param O: 观察值序列
+        :param beta: 运算中用到的临时数组
+        :param pprob: 返回值，所要求的概率
+        :return:
+        """
+
     #     1. Intialization
         for i in range(self.N):
             beta[T-1,i] = 1.0
@@ -92,9 +121,18 @@ class HMM:
         pprob[0] = 0.0
         for i in range(self.N):
             pprob[0] += self.pi[i]*self.B[i,O[0]]*beta[0,i]
-    
-    # 带修正的后向算法
+
     def BackwardWithScale(self,T,O,beta,scale):
+        """
+        带修正的后向算法
+
+        :param T: 观察值序列的长度
+        :param O: 观察值序列
+        :param beta: 运算中用到的临时数组
+        :param scale:
+        :return: 返回值，所要求的概率
+        """
+
     #     1. Intialization
         for i in range(self.N):
             beta[T-1,i] = 1.0
@@ -107,9 +145,14 @@ class HMM:
                     sum += self.A[i,j]*self.B[j,O[t+1]]*beta[t+1,j]
                 beta[t,i] = sum / scale[t+1]
     
-    # Viterbi算法
-    # 输入：A，B，pi,O 输出P(O|lambda)最大时Poptimal的路径I
     def viterbi(self,O):
+        """
+        Viterbi算法
+        输入：A，B，pi,O 输出P(O|lambda)最大时Poptimal的路径I
+
+        :param O:
+        :return:
+        """
         T = len(O)
         # 初始化
         delta = np.zeros((T,self.N),np.float)  
@@ -131,8 +174,17 @@ class HMM:
             I[t] = phi[t+1,I[t+1]]
         return I,prob
     
-    # 计算gamma : 时刻t时马尔可夫链处于状态Si的概率    
+
     def ComputeGamma(self, T, alpha, beta, gamma):
+        """
+        计算gamma : 时刻t时马尔可夫链处于状态Si的概率
+
+        :param T:
+        :param alpha:
+        :param beta:
+        :param gamma:
+        :return:
+        """
         for t in range(T):
             denominator = 0.0
             for j in range(self.N):
@@ -141,9 +193,19 @@ class HMM:
             for i in range(self.N):
                 gamma[t,i] = gamma[t,i]/denominator
     
-    # 计算sai(i,j) 为给定训练序列O和模型lambda时：
-    # 时刻t是马尔可夫链处于Si状态，二时刻t+1处于Sj状态的概率
     def ComputeXi(self,T,O,alpha,beta,gamma,xi):
+        """
+        计算sai(i,j) 为给定训练序列O和模型lambda时：
+        时刻t是马尔可夫链处于Si状态，二时刻t+1处于Sj状态的概率
+
+        :param T:
+        :param O:
+        :param alpha:
+        :param beta:
+        :param gamma:
+        :param xi:
+        :return:
+        """
         for t in range(T-1):
             sum = 0.0
             for i in range(self.N):
@@ -154,9 +216,20 @@ class HMM:
                 for j in range(self.N):
                     xi[t,i,j] /= sum
                     
-    # Baum-Welch算法
-    # 输入 L个观察序列O，初始模型：HMM={A,B,pi,N,M}
+
     def BaumWelch(self,L,T,O,alpha,beta,gamma):
+        """
+        Baum-Welch算法
+        输入 L个观察序列O，初始模型：HMM={A,B,pi,N,M}
+
+        :param L:
+        :param T:
+        :param O:
+        :param alpha:
+        :param beta:
+        :param gamma:
+        :return:
+        """
         print "BaumWelch"
         DELTA = 0.01 ; round = 0 ; flag = 1 ; probf = [0.0]
         delta = 0.0 ; deltaprev = 0.0 ; probprev = 0.0 ; ratio = 0.0 ; deltaprev = 10e-70
